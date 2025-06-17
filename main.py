@@ -1,6 +1,8 @@
 import time, requests
 import pandas as pd
 import config as cfg
+import matplotlib.pyplot as plt
+
 
 def validate_response(response):
     if response.status_code == 200:
@@ -35,7 +37,7 @@ def backpack(item, quality, fname):
             df.to_csv(f"{fname}.csv")
         return df
 
-backpack("Earbuds", "Unique", "backpack_test")
+# backpack("Earbuds", "Unique", "backpack_test")
 
 def steam(item):
     url = "https://steamcommunity.com/market/pricehistory/"
@@ -56,8 +58,84 @@ def steam(item):
         df.to_csv("steam_test.csv")
         return df
     
-steam("Earbuds")
+steam("Haunted%20Voodoo-Cursed%20Soldier%20Soul")
 
-# to do
+# helper function
+def plot(df, time, metric):
+    plt.plot(time,df[metric],label=metric)
+    plt.xlabel("Date")
+    plt.ylabel("Price (£)")
+    plt.legend()
+
+
+# computes 8 metrics
+# Moving Averages -> Simple and Exponential MA - 7 days and 30 days
+# Momentum - 7 Days and 30 Days 
+# Volatility - yearly and monthly
 def compute_stats(fname):
-    pass
+    df = pd.read_csv(fname)
+
+    # dataset cleaning
+    df['timestamp_str'] = df['timestamp_str'].str[:-7]
+    df['timestamp_str'] = pd.to_datetime(df['timestamp_str'])
+    df = df.drop(df.columns[0],axis=1)
+    df.set_index('timestamp_str', inplace=True)
+    # df = df.drop(df.columns[0],axis=0)
+    print(df.columns)
+    # print(df)
+    # df.set_index('timestamp_str', inplace=True)
+    # df.drop(df.columns[0], axis=1)
+    # print(df.columns)
+    # df = df.resample('3D').mean().dropna().reset_index()
+
+    df["SMA_7"] = df['price'].rolling(window=7).mean()
+    df["SMA_30"] = df['price'].rolling(window=30).mean()
+    df['EMA_7'] = df['price'].ewm(span=7, adjust=False).mean()
+    df['EMA_30'] = df['price'].ewm(span=30, adjust=False).mean()
+    df["MOMENT_30"] = df['price'].pct_change(periods=30)
+    df["MOMENT_7"] = df['price'].pct_change(periods=7)
+    graphs = ["price","SMA_7","SMA_30","EMA_7","EMA_30","MOMENT_7","MOMENT_30",""]
+    # plt.plot(df.index,df['SMA_30'],label="normal")
+    for i in range(7):
+        plt.subplot(3,3,i+1)
+        plot(df, df.index, graphs[i])
+
+    # volatility_yearly = df.groupby(df.index.dt.year)['price'].std() * (365 ** 0.5)
+    volatility_yearly = df.resample('Y')['price'].std() * (365 ** 0.5)
+    volatility_monthly = df.resample('M')['price'].std() * (30 ** 0.5)
+    plt.subplot(3,3,8)
+    plt.plot(volatility_yearly.index,volatility_yearly,label="VOL_365")
+    plt.xlabel("Year")
+    plt.ylabel("Percent")
+    plt.legend()
+    plt.subplot(3,3,9)
+    plt.plot(volatility_monthly.index,volatility_monthly,label="VOL_30")
+    plt.xlabel("Date")
+    plt.ylabel("Percent")
+    plt.legend()
+    plt.show()
+
+# grouping by month - see price comparison for each month on average, see which months tend to be more expensive (short term investing/trading)
+# and volatility - what months tend to be volatile or unstable
+def monthly_comparison(fname):
+    df = pd.read_csv(fname)
+    df['timestamp_str'] = df['timestamp_str'].str[:-7]
+    df['timestamp_str'] = pd.to_datetime(df['timestamp_str'])
+    volatility = df.groupby(df['timestamp_str'].dt.month)['price'].std() * (365 ** 0.5)
+    average_price = df.groupby(df['timestamp_str'].dt.month)['price'].mean() 
+
+    plt.subplot(2,1,1)
+    plt.plot(volatility.index,volatility,label="volatility")
+    plt.xlabel("Month")
+    plt.ylabel("Percent")
+    plt.legend()
+    plt.subplot(2,1,2)
+    plt.plot(average_price.index,average_price,label="price")
+    plt.xlabel("Month")
+    plt.ylabel("Price")
+    plt.legend()
+    plt.show()
+
+
+# compute_stats("steam_test.csv")
+monthly_comparison("steam_test.csv")
