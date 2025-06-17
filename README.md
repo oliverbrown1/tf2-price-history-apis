@@ -4,6 +4,8 @@ A comparison of the current APIs available that were working for me to obtain th
 
 Currently, only 2 methods are looked at, using Backpack.tf API and Steams API for accessing price history. 
 
+A simple financial analysis is performed on the retrieved API data. We compuite the rolling SMA, EMA, Momentum for both 7 days and 30 days. We also compute Volatility. There is also the option to compute the average price and volatility grouping by each month. Since the economy is heavily influenced by annual events i.e. Halloween (Scream Fortress) and Christmas (Smissmas), we can analyse statistics for each month, and can see that prices and volatility generally spikes during both of these events.
+
 ## TF2 Market
 
 TF2 is an FPS game created by Valve, that quickly established an economy worth quite a bit of money. Its primary currency is Keys and Refined Metal
@@ -12,9 +14,8 @@ TF2 is an FPS game created by Valve, that quickly established an economy worth q
 
 Create a config.py file and fill in with necessary api key / session credentials for Steam. For this I used cookies for my current Steam session (idk if this is a bad idea)
 
-## To-do (for me)
+## To-do
 
-* Basic financial analysis of recorded data
 * Gladiator.tf and Marketplace.tf API / price history data
 
 ## Notes
@@ -28,5 +29,6 @@ Sources used:
 
 https://gwern.net/doc/economics/2012-varoufakis-teamfortress2arbitrage.html
 https://theceoviews.com/tf2-trade-mastery-strategies-for-success-in-the-team-fortress-2-economy/
+https://www.cryptohopper.com/blog/trading-101-technical-analysis-for-beginners-168
 
 
