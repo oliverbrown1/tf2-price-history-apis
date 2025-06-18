@@ -40,6 +40,9 @@ def backpack(item, quality, fname):
 # backpack("Earbuds", "Unique", "backpack_test")
 
 def steam(item):
+
+
+
     url = "https://steamcommunity.com/market/pricehistory/"
     params = {
         "appid": 440,
@@ -58,7 +61,7 @@ def steam(item):
         df.to_csv("steam_test.csv")
         return df
     
-steam("Haunted%20Voodoo-Cursed%20Soldier%20Soul")
+# steam("Haunted%20Voodoo-Cursed%20Soldier%20Soul")
 
 # helper function
 def plot(df, time, metric):
@@ -72,7 +75,7 @@ def plot(df, time, metric):
 # Moving Averages -> Simple and Exponential MA - 7 days and 30 days
 # Momentum - 7 Days and 30 Days 
 # Volatility - yearly and monthly
-def compute_stats(fname):
+def compute_stats(item, fname):
     df = pd.read_csv(fname)
 
     # dataset cleaning
@@ -81,7 +84,7 @@ def compute_stats(fname):
     df = df.drop(df.columns[0],axis=1)
     df.set_index('timestamp_str', inplace=True)
     # df = df.drop(df.columns[0],axis=0)
-    print(df.columns)
+    # print(df.columns)
     # print(df)
     # df.set_index('timestamp_str', inplace=True)
     # df.drop(df.columns[0], axis=1)
@@ -101,8 +104,8 @@ def compute_stats(fname):
         plot(df, df.index, graphs[i])
 
     # volatility_yearly = df.groupby(df.index.dt.year)['price'].std() * (365 ** 0.5)
-    volatility_yearly = df.resample('Y')['price'].std() * (365 ** 0.5)
-    volatility_monthly = df.resample('M')['price'].std() * (30 ** 0.5)
+    volatility_yearly = df.resample('YE')['price'].std() * (365 ** 0.5)
+    volatility_monthly = df.resample('ME')['price'].std() * (30 ** 0.5)
     plt.subplot(3,3,8)
     plt.plot(volatility_yearly.index,volatility_yearly,label="VOL_365")
     plt.xlabel("Year")
@@ -112,12 +115,13 @@ def compute_stats(fname):
     plt.plot(volatility_monthly.index,volatility_monthly,label="VOL_30")
     plt.xlabel("Date")
     plt.ylabel("Percent")
+    plt.suptitle(item)
     plt.legend()
     plt.show()
 
 # grouping by month - see price comparison for each month on average, see which months tend to be more expensive (short term investing/trading)
 # and volatility - what months tend to be volatile or unstable
-def monthly_comparison(fname):
+def monthly_comparison(item, fname):
     df = pd.read_csv(fname)
     df['timestamp_str'] = df['timestamp_str'].str[:-7]
     df['timestamp_str'] = pd.to_datetime(df['timestamp_str'])
@@ -134,8 +138,11 @@ def monthly_comparison(fname):
     plt.xlabel("Month")
     plt.ylabel("Price")
     plt.legend()
+    plt.suptitle(item)
     plt.show()
 
-
-# compute_stats("steam_test.csv")
-monthly_comparison("steam_test.csv")
+if __name__ == '__main__':
+    item = "Combustible Cutie"
+    df = steam(item)
+    compute_stats(item,"steam_test.csv")
+    monthly_comparison(item, "steam_test.csv")
