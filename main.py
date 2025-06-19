@@ -58,7 +58,7 @@ def steam(item):
     response = requests.get(url, params=params, cookies=cookies)
     if validate_response(response):
         df = pd.DataFrame(response.json()["prices"], columns=["timestamp_str", "price", "volume"])
-        df.to_csv("steam_test.csv")
+        df.to_csv("steam.csv")
         return df
     
 # steam("Haunted%20Voodoo-Cursed%20Soldier%20Soul")
@@ -142,7 +142,7 @@ def monthly_comparison(item, fname):
     plt.show()
 
 if __name__ == '__main__':
-    item = "Combustible Cutie"
+    item = "Bill's Hat"
     df = steam(item)
-    compute_stats(item,"steam_test.csv")
-    monthly_comparison(item, "steam_test.csv")
+    compute_stats(item,"steam.csv")
+    monthly_comparison(item, "steam.csv")
